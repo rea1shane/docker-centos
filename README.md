@@ -9,12 +9,7 @@ make build
 ## Run
 
 ```shell
-make run HOSTNAME={hostname} SSH_PORT={ssh_port}
+make run HOSTNAME={hostname}
 ```
 
-## Setting root password after run
-
-```shell
-docker exec -it {hostname} /bin/zsh
-passwd
-```
+The default password for root is `1`.

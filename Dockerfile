@@ -9,18 +9,12 @@ RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* \
     && yum -y install wget \
     && yum -y install zsh \
     && yum -y install openssh-server \
-    && yum -y install openssh-clients \
-    && yum -y install passwd \
     && yum clean all \
     && rm -rf /var/cache/yum/*
 
 RUN systemctl enable sshd \
-    && ln -s /root/.ssh/id_rsa /etc/ssh/ssh_host_rsa_key \
-    && ln -s /root/.ssh/id_rsa /etc/ssh/ssh_host_ecdsa_key \
-    && ln -s /root/.ssh/id_rsa /etc/ssh/ssh_host_ed25519_key \
-    && ln -s /root/.ssh/id_rsa.pub /etc/ssh/ssh_host_rsa_key.pub \
-    && ln -s /root/.ssh/id_rsa.pub /etc/ssh/ssh_host_ecdsa_key.pub \
-    && ln -s /root/.ssh/id_rsa.pub /etc/ssh/ssh_host_ed25519_key.pub
+    && echo "root:1" | chpasswd \
+    && usermod -s /bin/zsh root
 
 RUN git config --global push.default simple \
     && git config --global pull.rebase false
@@ -30,10 +24,8 @@ RUN echo Y | sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/t
     && git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting \
     && git clone https://github.com/zsh-users/zsh-completions.git ~/.oh-my-zsh/custom/plugins/zsh-completions
 
-COPY .zshrc /root/.zshrc
-COPY .vimrc /root/.vimrc
-COPY linux.zsh-theme /root/.oh-my-zsh/custom/themes/linux.zsh-theme
-
 WORKDIR /root
 
-EXPOSE 22
+COPY .zshrc .zshrc
+COPY .vimrc .vimrc
+COPY linux.zsh-theme .oh-my-zsh/custom/themes/linux.zsh-theme
