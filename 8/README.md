@@ -1,5 +1,7 @@
 # CentOS 8
 
+The default password for root is `1`.
+
 ## Build
 
 ```shell
@@ -11,5 +13,3 @@ make build
 ```shell
 make run HOSTNAME={hostname}
 ```
-
-The default password for root is `1`.

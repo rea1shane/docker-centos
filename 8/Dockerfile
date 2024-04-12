@@ -1,4 +1,4 @@
-FROM centos:8
+FROM rea1shane/centos-sshd:8
 
 # Fix yum update error: https://techglimpse.com/failed-metadata-repo-appstream-centos-8/
 RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* \
@@ -9,18 +9,9 @@ RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* \
     && yum -y install wget \
     && yum -y install net-tools \
     && yum -y install zsh \
-    && yum -y install openssh-server \
-    && yum clean all \
-    && rm -rf /var/cache/yum/*
+    && yum clean all
 
-# Fix Unable to load host key: ssh_host_rsa_key, ssh_host_ecdsa_key, ssh_host_ed25519_key
-RUN ssh-keygen -t rsa -N "" -f /etc/ssh/ssh_host_rsa_key \
-    && ssh-keygen -t rsa -N "" -f /etc/ssh/ssh_host_ecdsa_key \
-    && ssh-keygen -t rsa -N "" -f /etc/ssh/ssh_host_ed25519_key
-
-RUN echo "root:1" | chpasswd \
-    && usermod -s /bin/zsh root \
-    && rm /run/nologin # Remove warning: https://unix.stackexchange.com/questions/487742/system-is-booting-up-unprivileged-users-are-not-permitted-to-log-in-yet
+RUN usermod -s /bin/zsh root
 
 RUN git config --global push.default simple \
     && git config --global pull.rebase false
@@ -32,9 +23,6 @@ RUN echo Y | sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/t
 
 WORKDIR /root
 
-COPY .zshrc .zshrc
-COPY .vimrc .vimrc
-COPY linux.zsh-theme .oh-my-zsh/custom/themes/linux.zsh-theme
-
-# Output sshd logs: https://serverfault.com/questions/952391/sshd-logs-in-docker-container-not-shown-by-docker-logs
-CMD ["/usr/sbin/sshd", "-D", "-e"]
+COPY resources/.zshrc .zshrc
+COPY resources/.vimrc .vimrc
+COPY resources/linux.zsh-theme .oh-my-zsh/custom/themes/linux.zsh-theme
