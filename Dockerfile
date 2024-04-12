@@ -7,14 +7,20 @@ RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* \
     && yum -y install git \
     && yum -y install vim \
     && yum -y install wget \
+    && yum -y install net-tools \
     && yum -y install zsh \
     && yum -y install openssh-server \
     && yum clean all \
     && rm -rf /var/cache/yum/*
 
-RUN systemctl enable sshd \
-    && echo "root:1" | chpasswd \
-    && usermod -s /bin/zsh root
+# Fix Unable to load host key: ssh_host_rsa_key, ssh_host_ecdsa_key, ssh_host_ed25519_key
+RUN ssh-keygen -t rsa -N "" -f /etc/ssh/ssh_host_rsa_key \
+    && ssh-keygen -t rsa -N "" -f /etc/ssh/ssh_host_ecdsa_key \
+    && ssh-keygen -t rsa -N "" -f /etc/ssh/ssh_host_ed25519_key
+
+RUN echo "root:1" | chpasswd \
+    && usermod -s /bin/zsh root \
+    && rm /run/nologin # Remove warning: https://unix.stackexchange.com/questions/487742/system-is-booting-up-unprivileged-users-are-not-permitted-to-log-in-yet
 
 RUN git config --global push.default simple \
     && git config --global pull.rebase false
@@ -29,3 +35,6 @@ WORKDIR /root
 COPY .zshrc .zshrc
 COPY .vimrc .vimrc
 COPY linux.zsh-theme .oh-my-zsh/custom/themes/linux.zsh-theme
+
+# Output sshd logs: https://serverfault.com/questions/952391/sshd-logs-in-docker-container-not-shown-by-docker-logs
+CMD ["/usr/sbin/sshd", "-D", "-e"]
